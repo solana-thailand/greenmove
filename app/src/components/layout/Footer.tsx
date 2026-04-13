@@ -4,9 +4,7 @@ import { twMerge } from "tailwind-merge";
 
 const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
-interface FooterProps extends HTMLAttributes<HTMLElement> {}
-
-const Footer = forwardRef<HTMLElement, FooterProps>(
+const Footer = forwardRef<HTMLElement, HTMLAttributes<HTMLElement>>(
   ({ className, ...props }, ref) => (
     <footer
       ref={ref}

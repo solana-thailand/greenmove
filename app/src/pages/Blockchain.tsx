@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -29,30 +29,42 @@ function Blockchain() {
   const [sortBy, setSortBy] = useState("week");
   const [filterType, setFilterType] = useState("all");
 
-  const blocks: BlockchainBlock[] = Array.from({ length: 52 }, (_, i) => ({
-    week: i + 1,
-    water: Math.random() > 0.3 ? Number((Math.random() * 100).toFixed(2)) : 0,
-    electric:
-      Math.random() > 0.3 ? Number((Math.random() * 100).toFixed(2)) : 0,
-  }));
+  const baseTimestamp = useMemo(() => Date.now(), []);
 
-  const historyRecords: HistoryRecord[] = blocks
-    .filter((block) => block.water > 0 || block.electric > 0)
-    .map((block) => ({
-      id: `block-${block.week}`,
-      week: block.week,
-      waterConsumption: block.water,
-      electricConsumption: block.electric,
-      timestamp: new Date(
-        Date.now() - (52 - block.week) * 7 * 24 * 60 * 60 * 1000
-      ).toISOString(),
-      status: "confirmed" as const,
-    }))
-    .sort((a, b) => {
-      if (sortBy === "week") return b.week - a.week;
-      if (sortBy === "water") return b.waterConsumption - a.waterConsumption;
-      return b.electricConsumption - a.electricConsumption;
-    });
+  const blocks: BlockchainBlock[] = useMemo(
+    () =>
+      Array.from({ length: 52 }, (_, i) => ({
+        week: i + 1,
+        water:
+          Math.random() > 0.3 ? Number((Math.random() * 100).toFixed(2)) : 0,
+        electric:
+          Math.random() > 0.3 ? Number((Math.random() * 100).toFixed(2)) : 0,
+      })),
+    []
+  );
+
+  const historyRecords: HistoryRecord[] = useMemo(
+    () =>
+      blocks
+        .filter((block) => block.water > 0 || block.electric > 0)
+        .map((block) => ({
+          id: `block-${block.week}`,
+          week: block.week,
+          waterConsumption: block.water,
+          electricConsumption: block.electric,
+          timestamp: new Date(
+            baseTimestamp - (52 - block.week) * 7 * 24 * 60 * 60 * 1000
+          ).toISOString(),
+          status: "confirmed" as const,
+        }))
+        .sort((a, b) => {
+          if (sortBy === "week") return b.week - a.week;
+          if (sortBy === "water")
+            return b.waterConsumption - a.waterConsumption;
+          return b.electricConsumption - a.electricConsumption;
+        }),
+    [blocks, sortBy]
+  );
 
   const getBlockColor = (block: BlockchainBlock) => {
     if (block.water === 0 && block.electric === 0) return INACTIVE_COLOR;
