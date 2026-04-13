@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -7,126 +6,64 @@ import {
 } from "../components/ui/Card";
 
 import Select from "../components/ui/Select";
-import { Blocks, Calendar, Zap, Droplets } from "lucide-react";
-import { INACTIVE_COLOR, WATER_COLOR, ELECTRIC_COLOR } from "../constants";
-import {
-  generateBlockchainBlocks,
-  generateHistoryRecords,
-  type BlockchainBlock,
-} from "../lib/mockData";
+import { Calendar, Zap, Droplets, ArrowLeft, ArrowRight } from "lucide-react";
+import { useBlockchainData } from "../hooks/useBlockchainData";
+import ContributionGraph from "../components/features/blockchain/ContributionGraph";
 
 function Blockchain() {
-  const [sortBy, setSortBy] = useState<"week" | "water" | "electric">("week");
-  const [filterType, setFilterType] = useState("all");
-
-  const blocks = generateBlockchainBlocks();
-
-  const historyRecords = useMemo(
-    () => generateHistoryRecords(blocks, sortBy),
-    [blocks, sortBy]
-  );
-
-  const getBlockColor = (block: BlockchainBlock) => {
-    if (block.water === 0 && block.electric === 0) return INACTIVE_COLOR;
-    if (block.water > 0 && block.electric > 0) return ELECTRIC_COLOR;
-    if (block.water > 0) return WATER_COLOR;
-    return ELECTRIC_COLOR;
-  };
+  const {
+    paginatedHistory,
+    monthlyWaterBlocks,
+    monthlyElectricBlocks,
+    sortBy,
+    setSortBy,
+    currentPage,
+    itemsPerPage,
+    totalPages,
+    goToPage,
+    nextPage,
+    previousPage,
+  } = useBlockchainData();
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Blockchain History
-        </h2>
-        <div className="flex items-center gap-4">
-          <Select
-            value={filterType}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setFilterType(e.target.value)
-            }
-            options={[
-              { value: "all", label: "All Activity" },
-              { value: "water", label: "Water Only" },
-              { value: "electric", label: "Electric Only" },
-              { value: "mixed", label: "Both" },
-            ]}
-          />
-        </div>
+      <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+        Blockchain History
+      </h2>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Droplets className="h-5 w-5 text-blue-500" />
+              Water Usage (Monthly)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ContributionGraph
+              blocks={monthlyWaterBlocks}
+              type="water"
+              title="Water Consumption"
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Zap className="h-5 w-5 text-yellow-500" />
+              Electric Usage (Monthly)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ContributionGraph
+              blocks={monthlyElectricBlocks}
+              type="electric"
+              title="Electric Consumption"
+            />
+          </CardContent>
+        </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Blocks className="h-5 w-5" />
-            Weekly Activity (52 Weeks)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div
-              className="grid gap-2"
-              style={{ gridTemplateColumns: "repeat(52, minmax(0, 1fr))" }}
-            >
-              {blocks.map((block) => {
-                const isFiltered =
-                  (filterType === "water" &&
-                    (block.electric > 0 || block.water === 0)) ||
-                  (filterType === "electric" &&
-                    (block.water > 0 || block.electric === 0)) ||
-                  (filterType === "mixed" &&
-                    (block.water === 0 || block.electric === 0));
-
-                return (
-                  <div
-                    key={block.week}
-                    className={`aspect-square rounded-sm transition-transform hover:scale-110 ${
-                      isFiltered ? "opacity-20" : "opacity-100"
-                    }`}
-                    style={{ backgroundColor: getBlockColor(block) }}
-                    title={`Week ${block.week}: Water ${block.water}m³, Electric ${block.electric}kWh`}
-                  />
-                );
-              })}
-            </div>
-
-            <div className="flex items-center justify-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-3 w-3 rounded-sm"
-                  style={{ backgroundColor: INACTIVE_COLOR }}
-                />
-                <span className="text-gray-600 dark:text-gray-400">
-                  Inactive
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-3 w-3 rounded-sm"
-                  style={{ backgroundColor: WATER_COLOR }}
-                />
-                <span className="text-gray-600 dark:text-gray-400">Water</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-3 w-3 rounded-sm"
-                  style={{ backgroundColor: ELECTRIC_COLOR }}
-                />
-                <span className="text-gray-600 dark:text-gray-400">
-                  Electric
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-3 w-3 rounded-sm"
-                  style={{ backgroundColor: ELECTRIC_COLOR }}
-                />
-                <span className="text-gray-600 dark:text-gray-400">Both</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
@@ -170,7 +107,7 @@ function Blockchain() {
                 </tr>
               </thead>
               <tbody>
-                {historyRecords.map((record) => (
+                {paginatedHistory.map((record) => (
                   <tr
                     key={record.id}
                     className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50"
@@ -203,6 +140,50 @@ function Blockchain() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between">
+            <button
+              onClick={previousPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Previous
+            </button>
+
+            <div className="flex items-center gap-2">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => goToPage(page)}
+                    className={`h-8 w-8 rounded-lg text-sm font-medium transition-colors ${
+                      currentPage === page
+                        ? "bg-blue-500 text-white"
+                        : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
+            </div>
+
+            <button
+              onClick={nextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              Next
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
+            Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+            {Math.min(currentPage * itemsPerPage, totalPages * itemsPerPage)} of{" "}
+            {totalPages * itemsPerPage} records
           </div>
         </CardContent>
       </Card>

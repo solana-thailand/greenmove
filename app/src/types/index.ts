@@ -13,6 +13,9 @@ export type {
   MonthlyConsumption,
   ConsumptionHistory,
   ElectricMeterLevel,
+  WeeklyBlock,
+  MonthlyRow,
+  MonthlyComparisonData,
 } from "./consumption";
 
 export type {
@@ -40,3 +43,12 @@ export type {
   SwapQuote,
   SwapError,
 } from "./swap";
+
+export type {
+  BlockchainBlock,
+  HistoryRecord,
+  MonthlyBlock,
+  BlockchainSortBy,
+  BlockchainFilterType,
+  UtilityType,
+} from "./blockchain";

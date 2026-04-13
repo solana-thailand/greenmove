@@ -1,12 +1,12 @@
-import { Outlet } from "react-router";
-import { MainLayout } from "./components/layout";
+// import { Outlet } from "react-router";
+// import { MainLayout } from "./components/layout";
 
-function App() {
-  return (
-    <MainLayout activeRoute="/">
-      <Outlet />
-    </MainLayout>
-  );
-}
+// function App() {
+//   return (
+//     <MainLayout>
+//       <Outlet />
+//     </MainLayout>
+//   );
+// }
 
-export default App;
+// export default App;

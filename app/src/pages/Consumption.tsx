@@ -5,8 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/Card";
-import Button from "../components/ui/Button";
-import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
 import {
   Droplets,
@@ -15,6 +13,7 @@ import {
   TrendingDown,
   Calendar,
 } from "lucide-react";
+import { mockMonthlyComparisonData } from "../mock/consumption";
 
 function Consumption() {
   const [selectedMonth, setSelectedMonth] = useState("current");
@@ -57,32 +56,33 @@ function Consumption() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <div className="text-4xl font-bold text-blue-500">
-                {waterConsumption}
+            <div className="space-y-2">
+              <div>
+                <div className="text-4xl font-bold text-blue-500">
+                  {waterConsumption}
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Cubic meters (m³)
+                </p>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Cubic meters (m³)
-              </p>
+              <div className="flex items-center gap-2 text-sm">
+                {waterChange > 0 ? (
+                  <>
+                    <TrendingUp className="h-4 w-4 text-red-500" />
+                    <span className="text-red-500">
+                      +{waterChange.toFixed(1)}% vs last month
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <TrendingDown className="h-4 w-4 text-green-500" />
+                    <span className="text-green-500">
+                      {waterChange.toFixed(1)}% vs last month
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              {waterChange > 0 ? (
-                <>
-                  <TrendingUp className="h-4 w-4 text-red-500" />
-                  <span className="text-red-500">
-                    +{waterChange.toFixed(1)}% vs last month
-                  </span>
-                </>
-              ) : (
-                <>
-                  <TrendingDown className="h-4 w-4 text-green-500" />
-                  <span className="text-green-500">
-                    {waterChange.toFixed(1)}% vs last month
-                  </span>
-                </>
-              )}
-            </div>
-            <div className="h-32 rounded-lg bg-blue-50 dark:bg-blue-950/20" />
           </CardContent>
         </Card>
 
@@ -94,41 +94,32 @@ function Consumption() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <div className="text-4xl font-bold text-yellow-500">
-                {electricConsumption}
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Kilowatt-hours (kWh)
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              {electricChange > 0 ? (
-                <>
-                  <TrendingUp className="h-4 w-4 text-red-500" />
-                  <span className="text-red-500">
-                    +{electricChange.toFixed(1)}% vs last month
-                  </span>
-                </>
-              ) : (
-                <>
-                  <TrendingDown className="h-4 w-4 text-green-500" />
-                  <span className="text-green-500">
-                    {electricChange.toFixed(1)}% vs last month
-                  </span>
-                </>
-              )}
-            </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Electric Meter
-                </span>
-                <span className="font-semibold text-yellow-500">
-                  High Usage
-                </span>
+              <div>
+                <div className="text-4xl font-bold text-yellow-500">
+                  {electricConsumption}
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Kilowatt-hours (kWh)
+                </p>
               </div>
-              <div className="h-3 rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-yellow-500" />
+              <div className="flex items-center gap-2 text-sm">
+                {electricChange > 0 ? (
+                  <>
+                    <TrendingUp className="h-4 w-4 text-red-500" />
+                    <span className="text-red-500">
+                      +{electricChange.toFixed(1)}% vs last month
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <TrendingDown className="h-4 w-4 text-green-500" />
+                    <span className="text-green-500">
+                      {electricChange.toFixed(1)}% vs last month
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -142,33 +133,76 @@ function Consumption() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64 rounded-lg bg-gray-50 dark:bg-gray-950/20" />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Log New Reading</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Input
-                label="Water Reading (m³)"
-                type="number"
-                placeholder="0.00"
-              />
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[800px]">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="py-2 px-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 w-20">
+                    Week
+                  </th>
+                  {mockMonthlyComparisonData.data.map((month, index) => (
+                    <th
+                      key={`${month.year}-${month.month}`}
+                      className="py-2 px-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 min-w-[60px]"
+                    >
+                      {(index + 1).toString().padStart(2, "0")}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[1, 2, 3, 4].map((weekNum) => (
+                  <tr
+                    key={weekNum}
+                    className="border-b border-gray-100 dark:border-gray-800 last:border-0"
+                  >
+                    <td className="py-2 px-3 text-sm font-medium text-gray-900 dark:text-white">
+                      Week {weekNum}
+                    </td>
+                    {mockMonthlyComparisonData.data.map((month) => {
+                      const week = month.weeks.find(
+                        (w) => w.weekNumber === weekNum
+                      );
+                      return (
+                        <td
+                          key={`${month.year}-${month.month}-${weekNum}`}
+                          className="py-2 px-2"
+                        >
+                          {week && week.isEmpty ? (
+                            <div className="h-12 w-12 mx-auto rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700" />
+                          ) : (
+                            <div
+                              className="h-12 w-12 mx-auto rounded-md border border-white dark:border-gray-700 shadow-sm"
+                              style={{
+                                backgroundColor: week?.color || "#f3f4f6",
+                              }}
+                            />
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700" />
+                <span>Empty</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded bg-blue-500" />
+                <span>100% Water</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded bg-yellow-500" />
+                <span>100% Electric</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded bg-gradient-to-r from-yellow-300 via-green-300 to-blue-500" />
+                <span>Mixed (Water : Electric)</span>
+              </div>
             </div>
-            <div>
-              <Input
-                label="Electric Reading (kWh)"
-                type="number"
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Button>Submit Reading</Button>
           </div>
         </CardContent>
       </Card>

@@ -4,7 +4,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/Card";
-import Button from "../components/ui/Button";
+import { Link } from "react-router-dom";
 import { Zap, Droplets, ArrowRight } from "lucide-react";
 
 function Dashboard() {
@@ -76,26 +76,46 @@ function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline" className="w-full justify-start">
-              <Droplets className="mr-2 h-4 w-4" />
-              View Consumption
-              <ArrowRight className="ml-auto h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <Zap className="mr-2 h-4 w-4" />
-              View History
-              <ArrowRight className="ml-auto h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <ArrowRight className="mr-2 h-4 w-4" />
-              Swap Tokens
-              <ArrowRight className="ml-auto h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <ArrowRight className="mr-2 h-4 w-4" />
-              Verify KYC
-              <ArrowRight className="ml-auto h-4 w-4" />
-            </Button>
+            <Link
+              to="/consumption"
+              className="flex items-center justify-between gap-3 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              <div className="flex items-center gap-2">
+                <Droplets className="h-4 w-4" />
+                View Consumption
+              </div>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/blockchain"
+              className="flex items-center justify-between gap-3 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4" />
+                View History
+              </div>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/swap"
+              className="flex items-center justify-between gap-3 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              <div className="flex items-center gap-2">
+                <ArrowRight className="h-4 w-4" />
+                Swap Tokens
+              </div>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/kyc"
+              className="flex items-center justify-between gap-3 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              <div className="flex items-center gap-2">
+                <ArrowRight className="h-4 w-4" />
+                Verify KYC
+              </div>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </CardContent>
       </Card>
