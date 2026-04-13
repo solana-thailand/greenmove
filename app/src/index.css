@@ -1,27 +1,46 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@import "tailwindcss";
 
-* {
-  margin: 0;
-  padding: 0;
-}
+@theme {
+  --color-primary: #10b981;
+  --color-primary-dark: #059669;
+  --color-secondary: #3b82f6;
+  --color-secondary-dark: #2563eb;
+  --color-accent: #f59e0b;
+  --color-accent-dark: #d97706;
 
-html,
-body {
-  height: 100%;
-}
+  --color-inactive: #9ca3af;
+  --color-water: #3b82f6;
+  --color-electric: #f59e0b;
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  --color-activity-low: #10b981;
+  --color-activity-medium: #f59e0b;
+  --color-activity-high: #ef4444;
+  --color-activity-very-high: #7c3aed;
+
+  --color-electric-low: #3b82f6;
+  --color-electric-medium: #6366f1;
+  --color-electric-high: #8b5cf6;
+  --color-electric-very-high: #f59e0b;
+
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 96rem;
+
+  --animate-fade-in: fade-in 0.3s ease-out;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 }
 
-#root {
-  height: 100%;
-}
+@custom-variant dark (&:where(.dark, .dark *));
