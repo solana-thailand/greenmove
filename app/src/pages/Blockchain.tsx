@@ -9,60 +9,20 @@ import {
 import Select from "../components/ui/Select";
 import { Blocks, Calendar, Zap, Droplets } from "lucide-react";
 import { INACTIVE_COLOR, WATER_COLOR, ELECTRIC_COLOR } from "../constants";
-
-interface BlockchainBlock {
-  week: number;
-  water: number;
-  electric: number;
-}
-
-interface HistoryRecord {
-  id: string;
-  week: number;
-  waterConsumption: number;
-  electricConsumption: number;
-  timestamp: string;
-  status: "confirmed" | "pending";
-}
+import {
+  generateBlockchainBlocks,
+  generateHistoryRecords,
+  type BlockchainBlock,
+} from "../lib/mockData";
 
 function Blockchain() {
-  const [sortBy, setSortBy] = useState("week");
+  const [sortBy, setSortBy] = useState<"week" | "water" | "electric">("week");
   const [filterType, setFilterType] = useState("all");
 
-  const baseTimestamp = useMemo(() => Date.now(), []);
+  const blocks = generateBlockchainBlocks();
 
-  const blocks: BlockchainBlock[] = useMemo(
-    () =>
-      Array.from({ length: 52 }, (_, i) => ({
-        week: i + 1,
-        water:
-          Math.random() > 0.3 ? Number((Math.random() * 100).toFixed(2)) : 0,
-        electric:
-          Math.random() > 0.3 ? Number((Math.random() * 100).toFixed(2)) : 0,
-      })),
-    []
-  );
-
-  const historyRecords: HistoryRecord[] = useMemo(
-    () =>
-      blocks
-        .filter((block) => block.water > 0 || block.electric > 0)
-        .map((block) => ({
-          id: `block-${block.week}`,
-          week: block.week,
-          waterConsumption: block.water,
-          electricConsumption: block.electric,
-          timestamp: new Date(
-            baseTimestamp - (52 - block.week) * 7 * 24 * 60 * 60 * 1000
-          ).toISOString(),
-          status: "confirmed" as const,
-        }))
-        .sort((a, b) => {
-          if (sortBy === "week") return b.week - a.week;
-          if (sortBy === "water")
-            return b.waterConsumption - a.waterConsumption;
-          return b.electricConsumption - a.electricConsumption;
-        }),
+  const historyRecords = useMemo(
+    () => generateHistoryRecords(blocks, sortBy),
     [blocks, sortBy]
   );
 
@@ -179,7 +139,7 @@ function Blockchain() {
               <Select
                 value={sortBy}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  setSortBy(e.target.value)
+                  setSortBy(e.target.value as "week" | "water" | "electric")
                 }
                 options={[
                   { value: "week", label: "Sort by Week" },

@@ -206,3 +206,54 @@ export const mockConsumptionHistory = {
   },
   yearlyData: mockConsumptionRecords,
 };
+
+export interface BlockchainBlock {
+  week: number;
+  water: number;
+  electric: number;
+}
+
+export interface HistoryRecord {
+  id: string;
+  week: number;
+  waterConsumption: number;
+  electricConsumption: number;
+  timestamp: string;
+  status: "confirmed" | "pending";
+}
+
+export const generateBlockchainBlocks = (): BlockchainBlock[] => {
+  return Array.from({ length: 52 }, (_, i) => ({
+    week: i + 1,
+    water: Math.random() > 0.3 ? Number((Math.random() * 100).toFixed(2)) : 0,
+    electric:
+      Math.random() > 0.3 ? Number((Math.random() * 100).toFixed(2)) : 0,
+  }));
+};
+
+export const generateHistoryRecords = (
+  blocks: BlockchainBlock[],
+  sortBy: "week" | "water" | "electric"
+): HistoryRecord[] => {
+  return blocks
+    .filter((block) => block.water > 0 || block.electric > 0)
+    .map((block) => {
+      const timestamp =
+        Date.now() - (52 - block.week) * 7 * 24 * 60 * 60 * 1000;
+      return {
+        id: `block-${block.week}`,
+        week: block.week,
+        waterConsumption: block.water,
+        electricConsumption: block.electric,
+        timestamp: new Date(timestamp).toISOString(),
+        status: "confirmed" as const,
+      };
+    })
+    .sort((a, b) => {
+      if (sortBy === "week") return b.week - a.week;
+      if (sortBy === "water") return b.waterConsumption - a.waterConsumption;
+      return b.electricConsumption - a.electricConsumption;
+    });
+};
+
+export const mockBlockchainBlocks = generateBlockchainBlocks();

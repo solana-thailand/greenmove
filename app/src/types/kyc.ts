@@ -10,8 +10,6 @@ export interface IDDocument {
   back?: string;
   type?: string;
   number?: string;
-  expiryDate?: Date;
-  issuingCountry?: string;
 }
 
 export interface KYCData {
