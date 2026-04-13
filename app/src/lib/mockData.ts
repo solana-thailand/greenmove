@@ -1,55 +1,10 @@
 import { subMonths, subDays } from "date-fns";
-
-export interface ConsumptionRecord {
-  id: string;
-  type: "water" | "electric";
-  date: Date;
-  value: number;
-  unit: string;
-  trend: "up" | "down" | "stable";
-  previousValue: number;
-}
-
-export interface KYCData {
-  id: string;
-  userId: string;
-  status: "not_started" | "in_progress" | "submitted" | "approved" | "rejected";
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-  dateOfBirth?: Date;
-  idDocument?: {
-    front?: string;
-    back?: string;
-    type?: string;
-    number?: string;
-  };
-  proofOfAddress?: string;
-  selfie?: string;
-  submittedAt?: Date;
-  reviewedAt?: Date;
-  rejectionReason?: string;
-}
-
-export interface SwapTransaction {
-  id: string;
-  fromToken: string;
-  toToken: string;
-  fromAmount: number;
-  toAmount: number;
-  rate: number;
-  timestamp: Date;
-  status: "pending" | "completed" | "failed";
-  txHash?: string;
-}
-
-export interface WalletData {
-  isConnected: boolean;
-  address?: string;
-  balance: number;
-  tokenSymbol: string;
-}
+import type {
+  ConsumptionRecord,
+  WalletData,
+  KYCData,
+  SwapTransaction,
+} from "../types";
 
 export const mockWalletData: WalletData = {
   isConnected: true,
