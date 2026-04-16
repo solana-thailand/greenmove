@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the reorganization of mock data from a single file into a modular structure with separate files for each feature domain.
+This document describes the reorganization of mock data from a single file into a modular structure with separate files for each feature domain. The system tracks solar energy generation and converts it to tokens.
 
 ## Changes Made
 
@@ -17,7 +17,7 @@ src/mock/
   ├── index.ts              # Central export point
   ├── wallet.ts             # Wallet-related mock data
   ├── dashboard.ts          # Dashboard statistics and activity
-  ├── consumption.ts        # Consumption records and history
+  ├── solar.ts             # Solar generation records and token conversion
   ├── kyc.ts               # KYC verification data
   ├── swap.ts              # Swap transactions
   └── blockchain.ts        # Blockchain blocks and activity
@@ -31,10 +31,10 @@ src/mock/
 ### `src/mock/dashboard.ts`
 - `mockDashboardData` - Dashboard statistics, trends, and recent activity
 
-### `src/mock/consumption.ts`
-- `generateConsumptionRecords(count)` - Generates consumption records
-- `mockConsumptionRecords` - Pre-generated monthly consumption data
-- `mockConsumptionHistory` - Current and monthly comparison data
+### `src/mock/solar.ts`
+- `generateSolarRecords(count)` - Generates solar generation records
+- `mockSolarRecords` - Pre-generated monthly solar generation data
+- `mockSolarHistory` - Current and monthly comparison data
 
 ### `src/mock/kyc.ts`
 - `mockKYCData` - Complete KYC verification data including documents
@@ -48,16 +48,15 @@ src/mock/
 - `generateBlockchainBlocks()` - Generates 52 weeks of block data
 - `mockBlockchainBlocks` - Pre-generated block data
 - `generateHistoryRecords(blocks, sortBy)` - Generates history from blocks
-- `generateMonthlyBlocks(type)` - Generates monthly blocks for contribution graph
-- `mockMonthlyWaterBlocks` - Monthly water consumption blocks
-- `mockMonthlyElectricBlocks` - Monthly electric consumption blocks
+- `generateMonthlyBlocks()` - Generates monthly blocks for contribution graph
+- `mockMonthlySolarBlocks` - Monthly solar generation blocks
 
 ### `src/mock/index.ts`
 Central export point that re-exports all mock data:
 ```typescript
 export * from "./wallet";
 export * from "./dashboard";
-export * from "./consumption";
+export * from "./solar";
 export * from "./kyc";
 export * from "./swap";
 export * from "./blockchain";
@@ -71,11 +70,12 @@ export * from "./blockchain";
 ```typescript
 import { mockWalletData } from "../mock/wallet";
 import { mockDashboardData } from "../mock/dashboard";
+import { mockSolarRecords } from "../mock/solar";
 ```
 
 #### Option 2: Import from Index
 ```typescript
-import { mockWalletData, mockDashboardData } from "../mock";
+import { mockWalletData, mockDashboardData, mockSolarRecords } from "../mock";
 ```
 
 ### Using Mock Data in Hooks
@@ -89,7 +89,8 @@ import { mockDashboardData } from "../mock/dashboard";
 export function useDashboardData() {
   const data = useMemo(() => mockDashboardData, []);
   return {
-    totalSupply: data.totalSupply,
+    totalSolarGeneration: data.totalSolarGeneration,
+    totalTokensMinted: data.totalTokensMinted,
     // ... other properties
   };
 }
@@ -109,6 +110,8 @@ export function useDashboardData() {
 
 - All hooks have been updated to import from the new `src/mock` directory
 - The `src/lib/mockData.ts` file has been deleted
+- Renamed `consumption.ts` to `solar.ts` to reflect the solar generation focus
+- Updated data structures to track solar generation (kWh) and token conversion
 - No changes required in components that use hooks
 - If components directly imported from mockData, update imports to point to `src/mock/...`
 
@@ -118,7 +121,10 @@ export function useDashboardData() {
 |------------|-------------|
 | `../lib/mockData` | `../mock` or `../mock/{domain}` |
 | `mockWalletData` | `mockWalletData` (same export) |
-| `generateConsumptionRecords` | `generateConsumptionRecords` (same export) |
+| `generateConsumptionRecords` | `generateSolarRecords` (renamed) |
+| `mockConsumptionRecords` | `mockSolarRecords` (renamed) |
+| `mockMonthlyWaterBlocks` | `mockMonthlySolarBlocks` (consolidated) |
+| `mockMonthlyElectricBlocks` | Removed (consolidated into solar) |
 
 ## Verification
 
@@ -140,14 +146,14 @@ yarn lint
 - `src/mock/index.ts`
 - `src/mock/wallet.ts`
 - `src/mock/dashboard.ts`
-- `src/mock/consumption.ts`
+- `src/mock/solar.ts`
 - `src/mock/kyc.ts`
 - `src/mock/swap.ts`
 - `src/mock/blockchain.ts`
 
 ### Updated
 - `src/hooks/useDashboardData.ts`
-- `src/hooks/useConsumptionData.ts`
+- `src/hooks/useSolarData.ts` (renamed from useConsumptionData)
 - `src/hooks/useBlockchainData.ts`
 - `src/hooks/useKYCData.ts`
 - `src/hooks/useSwapData.ts`

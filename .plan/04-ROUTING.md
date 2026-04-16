@@ -39,7 +39,7 @@ const router = createBrowserRouter([
 | Path | Component | Description |
 |------|-----------|-------------|
 | `/` | Dashboard | Main dashboard with statistics and quick actions |
-| `/consumption` | Consumption | Water and electric consumption tracking |
+| `/consumption` | Consumption | Solar generation tracking and token conversion |
 | `/blockchain` | Blockchain | Blockchain transaction history |
 | `/kyc` | KYC | Know Your Customer verification |
 | `/swap` | Swap | Token swap interface |

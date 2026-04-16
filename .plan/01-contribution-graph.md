@@ -1,7 +1,7 @@
-# Task 60: GitHub-Style Contribution Graph for Utility Usage
+# Task 60: GitHub-Style Contribution Graph for Solar Generation
 
 ## Overview
-Implemented a GitHub-style contribution graph component for displaying monthly water and electricity utility usage with color gradients based on usage ratio.
+Implemented a GitHub-style contribution graph component for displaying monthly solar energy generation with color gradients based on generation ratio.
 
 ## Files Created/Modified
 
@@ -26,13 +26,13 @@ Implemented a GitHub-style contribution graph component for displaying monthly w
 
 ### Files Modified
 1. **`src/lib/mockData.ts`**
-   - Added `generateMonthlyBlocks()` function to generate monthly usage data
-   - Generated mock data for water and electric consumption
+   - Added `generateMonthlyBlocks()` function to generate monthly generation data
+   - Generated mock data for solar generation
    - Imported types from `src/types/blockchain` instead of defining locally
 
 2. **`src/pages/Blockchain.tsx`**
-   - Replaced weekly activity grid with two contribution graphs
-   - One graph for water usage, one for electric usage
+   - Replaced weekly activity grid with contribution graph
+   - One graph for solar generation
    - Removed unused imports and code
    - Cleaner, more focused UI
 
@@ -41,12 +41,11 @@ Implemented a GitHub-style contribution graph component for displaying monthly w
 ### ContributionGraph Component
 - **Props**:
   - `blocks`: Array of MonthlyBlock data
-  - `type`: "water" | "electric"
+  - `type`: "solar"
   - `title`: Display title
 
 - **Color Gradients**:
-  - Water: Light blue (#f1f5f9) → Dark blue (#0c4a6e)
-  - Electric: Light yellow (#fef3c7) → Dark red (#991b1b)
+  - Solar: Light green (#dcfce7) → Dark red (#991b1b)
   - 5 color stops at ratios: 0, 0.25, 0.5, 0.75, 1.0
 
 - **Visual Design**:
@@ -81,10 +80,9 @@ interface MonthlyBlock {
 ```
 
 ### Mock Data Generation
-- Water: Base 100m³, variation ±50m³, max 150m³
-- Electric: Base 500kWh, variation ±200kWh, max 200kWh
+- Solar: Base 500kWh, variation ±200kWh, max 1000kWh
 - Generates 12 months of random data
-- Ratio calculated as usage / maxUsage, capped at 1.0
+- Ratio calculated as generation / maxGeneration, capped at 1.0
 
 ## Implementation Details
 
@@ -117,10 +115,10 @@ interface MonthlyBlock {
 
 ## Design Decisions
 
-### Why Separate Graphs for Water/Electric?
-- Cleaner UI without complex filtering
-- Easier to compare water vs electric usage patterns
-- Each graph has appropriate color scheme
+### Why Single Graph for Solar?
+- Cleaner UI with focused view
+- Easier to visualize solar generation patterns over time
+- Appropriate color scheme for renewable energy
 - Matches GitHub's single-type contribution graph pattern
 
 ### Why Quarter-Based Month Labels?
@@ -147,9 +145,9 @@ interface MonthlyBlock {
 
 ### Integration Opportunities
 - Connect to real blockchain data via wallet store
-- Use actual consumption data from consumption store
+- Use actual solar generation data from generation store
 - Implement real-time updates when new data is submitted
-- Add comparison view (water vs electric overlay)
+- Add comparison view (year-over-year overlay)
 
 ## Technical Notes
 

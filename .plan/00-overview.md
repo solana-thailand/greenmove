@@ -130,27 +130,28 @@ src/
 - KYC status tracking
 - KYC completion rewards
 
-### 3. Consumption Tracking
-- Record water consumption (L/month)
-- Record electric consumption (kWh/month)
+### 3. Solar Generation Tracking
+- Record solar generation (kWh/month)
+- Calculate token conversion rate
 - View monthly comparisons
 - Calculate differences
-- Consumption trends
+- Generation trends
 
 ### 4. Blockchain History View
 - GitHub-style contribution graph
 - Each block represents 1 week
 - Color coding:
   - Gray: inactive
-  - Blue: water consumption only
-  - Yellow: electric consumption only
-  - Gradient: both water and electric
+  - Green: low solar generation
+  - Yellow: medium solar generation
+  - Red: high solar generation
+  - Gradient: generation levels
 - Hover details for each block
 - Activity ratio mapping
 
-### 5. Electric Meter Gradient
-- Blue (low consumption) → Yellow (high consumption)
-- Static color mapping based on consumption ratio
+### 5. Solar Meter Gradient
+- Green (low generation) → Red (high generation)
+- Static color mapping based on generation ratio
 - Visual meter representation
 
 ### 6. History Table
@@ -160,8 +161,8 @@ src/
 - Pagination
 
 ### 7. Dashboard
-- Total water supply
-- Total electric supply
+- Total solar generation (kWh)
+- Total tokens minted
 - Weekly/monthly charts
 - Activity summary
 - Token balance display
@@ -179,28 +180,27 @@ src/
 ```typescript
 // Constants
 const INACTIVE_COLOR = 'gray-300';
-const WATER_COLOR = 'blue-500';
-const ELECTRIC_COLOR = 'yellow-500';
+const SOLAR_COLOR = 'green-500';
 
 // Ratio-based colors
 const ACTIVITY_RATIO_COLORS = {
-  low: 'blue-600',
-  medium: 'blue-400',
+  low: 'green-600',
+  medium: 'green-400',
   high: 'yellow-400',
-  very_high: 'yellow-600'
+  very_high: 'red-600'
 };
 ```
 
-### Electric Meter Gradient
+### Solar Meter Gradient
 
 ```typescript
-// 0% - 100% consumption maps to blue → yellow
-const ELECTRIC_METER_COLORS = [
-  'blue-600',   // 0-20%
-  'blue-500',   // 20-40%
-  'blue-400',   // 40-60%
-  'yellow-400', // 60-80%
-  'yellow-600'  // 80-100%
+// 0% - 100% generation maps to green → red
+const SOLAR_METER_COLORS = [
+  'green-600',   // 0-20%
+  'green-500',   // 20-40%
+  'green-400',   // 40-60%
+  'yellow-400',  // 60-80%
+  'red-600'      // 80-100%
 ];
 ```
 
@@ -209,12 +209,12 @@ const ELECTRIC_METER_COLORS = [
 ### Consumption Record
 
 ```typescript
-interface ConsumptionRecord {
+interface SolarRecord {
   id: string;
   userId: string;
   timestamp: Date;
-  waterConsumption: number;      // liters
-  electricConsumption: number;   // kWh
+  solarGeneration: number;       // kWh
+  tokensMinted: number;          // tokens
   month: string;                 // YYYY-MM
   week: number;                  // 1-4
   hash: string;                  // Blockchain hash
@@ -437,8 +437,8 @@ interface SwapTransaction {
 ### Phase 6: Blockchain History (30-34)
 
 **30**: Create BlockHistory component
-- Water consumption input
-- Electric consumption input
+- Solar generation input (kWh)
+- Token conversion display
 - Date picker
 - Submit button
 
@@ -459,8 +459,8 @@ interface SwapTransaction {
 - Calculate monthly totals
 
 **34**: Create week data aggregation
-- Validate water range
-- Validate electric range
+- Validate solar generation range
+- Calculate token conversion
 - Prevent duplicate submissions
 
 **35**: Add block interaction
@@ -476,7 +476,7 @@ interface SwapTransaction {
 **37**: Add animations
 - Bar chart for monthly comparison
 - Line chart for trends
-- Pie chart for water vs electric
+- Pie chart for solar to token conversion
 
 **38**: Create History page
 - Combine tracking components
@@ -544,8 +544,8 @@ interface SwapTransaction {
 ### Phase 8: Token Swap (50-54)
 
 **50**: Create SwapForm component
-- Total water supply display
-- Total electric supply display
+- Total solar generation display
+- Total tokens minted display
 - Visual indicators
 
 **51**: Create TokenSelector component
@@ -576,7 +576,7 @@ interface SwapTransaction {
 
 **56**: Create swap history
 - Date range selector
-- Filter by type (water/electric)
+- Filter by status (pending/completed/failed)
 - Reset filters
 
 **57**: Add swap confirmation
