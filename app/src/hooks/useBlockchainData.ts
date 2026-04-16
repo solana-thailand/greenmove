@@ -3,17 +3,15 @@ import type { BlockchainBlock, HistoryRecord, MonthlyBlock } from "../types";
 import {
   mockBlockchainBlocks,
   generateHistoryRecords,
-  mockMonthlyWaterBlocks,
-  mockMonthlyElectricBlocks,
+  mockMonthlySolarBlocks,
 } from "../mock/blockchain";
 
 interface UseBlockchainDataReturn {
   blocks: BlockchainBlock[];
   history: HistoryRecord[];
-  monthlyWaterBlocks: MonthlyBlock[];
-  monthlyElectricBlocks: MonthlyBlock[];
-  sortBy: "week" | "water" | "electric";
-  setSortBy: (sortBy: "week" | "water" | "electric") => void;
+  monthlySolarBlocks: MonthlyBlock[];
+  sortBy: "week" | "generation" | "tokens";
+  setSortBy: (sortBy: "week" | "generation" | "tokens") => void;
   currentPage: number;
   itemsPerPage: number;
   totalPages: number;
@@ -24,14 +22,15 @@ interface UseBlockchainDataReturn {
 }
 
 export const useBlockchainData = (): UseBlockchainDataReturn => {
-  const [sortBy, setSortBy] = useState<"week" | "water" | "electric">("week");
+  const [sortBy, setSortBy] = useState<"week" | "generation" | "tokens">(
+    "week"
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const blocks = mockBlockchainBlocks;
   const history = generateHistoryRecords(blocks, sortBy);
-  const monthlyWaterBlocks = mockMonthlyWaterBlocks;
-  const monthlyElectricBlocks = mockMonthlyElectricBlocks;
+  const monthlySolarBlocks = mockMonthlySolarBlocks;
 
   const totalPages = useMemo(() => {
     return Math.ceil(history.length / itemsPerPage);
@@ -61,7 +60,7 @@ export const useBlockchainData = (): UseBlockchainDataReturn => {
     }
   };
 
-  const handleSortByChange = (newSortBy: "week" | "water" | "electric") => {
+  const handleSortByChange = (newSortBy: "week" | "generation" | "tokens") => {
     setSortBy(newSortBy);
     setCurrentPage(1);
   };
@@ -69,8 +68,7 @@ export const useBlockchainData = (): UseBlockchainDataReturn => {
   return {
     blocks,
     history,
-    monthlyWaterBlocks,
-    monthlyElectricBlocks,
+    monthlySolarBlocks,
     sortBy,
     setSortBy: handleSortByChange,
     currentPage,

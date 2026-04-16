@@ -7,16 +7,14 @@ export type {
 } from "./wallet";
 
 export type {
-  ConsumptionType,
   Trend,
-  ConsumptionRecord,
-  MonthlyConsumption,
-  ConsumptionHistory,
-  ElectricMeterLevel,
+  SolarRecord,
+  MonthlySolar,
+  SolarHistory,
   WeeklyBlock,
   MonthlyRow,
   MonthlyComparisonData,
-} from "./consumption";
+} from "./solar";
 
 export type {
   KYCStatus,

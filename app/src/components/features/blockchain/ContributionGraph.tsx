@@ -9,7 +9,6 @@ interface MonthlyBlock {
 
 interface ContributionGraphProps {
   blocks: MonthlyBlock[];
-  type: "water" | "electric";
   title: string;
 }
 
@@ -30,19 +29,11 @@ const MONTHS = [
 
 const MONTH_POSITIONS = [0, 3, 6, 9];
 
-const WATER_COLORS = [
-  { ratio: 0, color: "#f1f5f9" },
-  { ratio: 0.25, color: "#bae6fd" },
-  { ratio: 0.5, color: "#38bdf8" },
-  { ratio: 0.75, color: "#0284c7" },
-  { ratio: 1, color: "#0c4a6e" },
-];
-
-const ELECTRIC_COLORS = [
-  { ratio: 0, color: "#fef3c7" },
-  { ratio: 0.25, color: "#fcd34d" },
-  { ratio: 0.5, color: "#f59e0b" },
-  { ratio: 0.75, color: "#ea580c" },
+const SOLAR_COLORS = [
+  { ratio: 0, color: "#f3f4f6" },
+  { ratio: 0.25, color: "#dcfce7" },
+  { ratio: 0.5, color: "#86efac" },
+  { ratio: 0.75, color: "#fcd34d" },
   { ratio: 1, color: "#991b1b" },
 ];
 
@@ -88,13 +79,13 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
     : { r: 0, g: 0, b: 0 };
 }
 
-function ContributionGraph({ blocks, type, title }: ContributionGraphProps) {
+function ContributionGraph({ blocks, title }: ContributionGraphProps) {
   const [hoveredBlock, setHoveredBlock] = useState<MonthlyBlock | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const colors = type === "water" ? WATER_COLORS : ELECTRIC_COLORS;
+  const colors = SOLAR_COLORS;
 
   const handleMouseEnter = (block: MonthlyBlock, index: number) => {
     setHoveredBlock(block);
@@ -149,9 +140,7 @@ function ContributionGraph({ blocks, type, title }: ContributionGraphProps) {
               {blocks.map((block, index) => {
                 const backgroundColor =
                   block.usage === 0
-                    ? type === "water"
-                      ? "#f1f5f9"
-                      : "#fef3c7"
+                    ? "#f3f4f6"
                     : interpolateColor(block.ratio, colors);
 
                 return (
@@ -160,7 +149,7 @@ function ContributionGraph({ blocks, type, title }: ContributionGraphProps) {
                     ref={(el) => {
                       blockRefs.current[index] = el;
                     }}
-                    className="relative h-7 w-7 shrink-0 cursor-pointer rounded-md transition-all hover:scale-110 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="relative h-7 w-7 shrink-0 cursor-pointer rounded-md transition-all hover:scale-110 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-500"
                     style={{
                       backgroundColor,
                       opacity: block.usage === 0 ? 0.3 : 1,
@@ -173,7 +162,7 @@ function ContributionGraph({ blocks, type, title }: ContributionGraphProps) {
                     tabIndex={0}
                     aria-label={`${block.monthName}: ${block.usage.toFixed(
                       1
-                    )} ${type === "water" ? "m³" : "kWh"}`}
+                    )} kWh`}
                   >
                     {block.usage > 0 && (
                       <div className="absolute inset-0 rounded-md ring-1 ring-black/5 dark:ring-white/10" />
@@ -197,8 +186,7 @@ function ContributionGraph({ blocks, type, title }: ContributionGraphProps) {
                   {hoveredBlock.monthName}
                 </div>
                 <div className="text-gray-600 dark:text-gray-300">
-                  {hoveredBlock.usage.toFixed(1)}{" "}
-                  {type === "water" ? "m³" : "kWh"}
+                  {hoveredBlock.usage.toFixed(1)} kWh
                 </div>
                 <div className="text-gray-500 dark:text-gray-400">
                   {(hoveredBlock.ratio * 100).toFixed(0)}% of max
@@ -224,7 +212,7 @@ function ContributionGraph({ blocks, type, title }: ContributionGraphProps) {
             />
           ))}
         </div>
-        <span className="font-medium">High Usage</span>
+        <span className="font-medium">High Generation</span>
       </div>
     </div>
   );

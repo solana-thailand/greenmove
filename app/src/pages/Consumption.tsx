@@ -6,33 +6,25 @@ import {
   CardTitle,
 } from "../components/ui/Card";
 import Select from "../components/ui/Select";
-import {
-  Droplets,
-  Zap,
-  TrendingUp,
-  TrendingDown,
-  Calendar,
-} from "lucide-react";
-import { mockMonthlyComparisonData } from "../mock/consumption";
+import { Sun, Coins, TrendingUp, TrendingDown, Calendar } from "lucide-react";
+import { mockSolarHistory, mockMonthlyComparisonData } from "../mock/solar";
 
 function Consumption() {
   const [selectedMonth, setSelectedMonth] = useState("current");
 
-  const waterConsumption = 1250.5;
-  const waterPrevious = 1180.2;
-  const electricConsumption = 850.3;
-  const electricPrevious = 795.8;
+  const solarGeneration = mockSolarHistory.currentMonth.generation;
+  const solarPrevious = mockSolarHistory.previousMonth.generation;
+  const tokensMinted = mockSolarHistory.currentMonth.tokensMinted;
+  const tokensPrevious = mockSolarHistory.previousMonth.tokensMinted;
 
-  const waterChange =
-    ((waterConsumption - waterPrevious) / waterPrevious) * 100;
-  const electricChange =
-    ((electricConsumption - electricPrevious) / electricPrevious) * 100;
+  const solarChange = ((solarGeneration - solarPrevious) / solarPrevious) * 100;
+  const tokensChange = ((tokensMinted - tokensPrevious) / tokensPrevious) * 100;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Consumption Tracking
+          Solar Generation Tracking
         </h2>
         <Select
           value={selectedMonth}
@@ -51,33 +43,33 @@ function Consumption() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Droplets className="h-5 w-5 text-blue-500" />
-              Water Consumption
+              <Sun className="h-5 w-5 text-green-500" />
+              Solar Generation
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div>
-                <div className="text-4xl font-bold text-blue-500">
-                  {waterConsumption}
+                <div className="text-4xl font-bold text-green-500">
+                  {solarGeneration}
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Cubic meters (m³)
+                  Kilowatt-hours (kWh)
                 </p>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                {waterChange > 0 ? (
+                {solarChange > 0 ? (
                   <>
-                    <TrendingUp className="h-4 w-4 text-red-500" />
-                    <span className="text-red-500">
-                      +{waterChange.toFixed(1)}% vs last month
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    <span className="text-green-500">
+                      +{solarChange.toFixed(1)}% vs last month
                     </span>
                   </>
                 ) : (
                   <>
-                    <TrendingDown className="h-4 w-4 text-green-500" />
-                    <span className="text-green-500">
-                      {waterChange.toFixed(1)}% vs last month
+                    <TrendingDown className="h-4 w-4 text-red-500" />
+                    <span className="text-red-500">
+                      {solarChange.toFixed(1)}% vs last month
                     </span>
                   </>
                 )}
@@ -89,33 +81,33 @@ function Consumption() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Zap className="h-5 w-5 text-yellow-500" />
-              Electric Consumption
+              <Coins className="h-5 w-5 text-yellow-500" />
+              Tokens Minted
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div>
                 <div className="text-4xl font-bold text-yellow-500">
-                  {electricConsumption}
+                  {tokensMinted}
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Kilowatt-hours (kWh)
+                  Tokens
                 </p>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                {electricChange > 0 ? (
+                {tokensChange > 0 ? (
                   <>
-                    <TrendingUp className="h-4 w-4 text-red-500" />
-                    <span className="text-red-500">
-                      +{electricChange.toFixed(1)}% vs last month
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    <span className="text-green-500">
+                      +{tokensChange.toFixed(1)}% vs last month
                     </span>
                   </>
                 ) : (
                   <>
-                    <TrendingDown className="h-4 w-4 text-green-500" />
-                    <span className="text-green-500">
-                      {electricChange.toFixed(1)}% vs last month
+                    <TrendingDown className="h-4 w-4 text-red-500" />
+                    <span className="text-red-500">
+                      {tokensChange.toFixed(1)}% vs last month
                     </span>
                   </>
                 )}
@@ -140,9 +132,9 @@ function Consumption() {
                   <th className="py-2 px-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 w-20">
                     Week
                   </th>
-                  {mockMonthlyComparisonData.data.map((month, index) => (
+                  {mockMonthlyComparisonData.data.map((_month, index) => (
                     <th
-                      key={`${month.year}-${month.month}`}
+                      key={`${_month.year}-${_month.month}`}
                       className="py-2 px-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 min-w-[60px]"
                     >
                       {(index + 1).toString().padStart(2, "0")}
@@ -191,16 +183,16 @@ function Consumption() {
                 <span>Empty</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded bg-blue-500" />
-                <span>100% Water</span>
+                <div className="h-4 w-4 rounded bg-green-400" />
+                <span>Low Generation</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded bg-yellow-500" />
-                <span>100% Electric</span>
+                <div className="h-4 w-4 rounded bg-yellow-400" />
+                <span>Medium Generation</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded bg-gradient-to-r from-yellow-300 via-green-300 to-blue-500" />
-                <span>Mixed (Water : Electric)</span>
+                <div className="h-4 w-4 rounded bg-red-600" />
+                <span>High Generation</span>
               </div>
             </div>
           </div>

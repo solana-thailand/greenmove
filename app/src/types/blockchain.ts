@@ -1,14 +1,14 @@
 export interface BlockchainBlock {
   week: number;
-  water: number;
-  electric: number;
+  solarGeneration: number;
+  tokensMinted: number;
 }
 
 export interface HistoryRecord {
   id: string;
   week: number;
-  waterConsumption: number;
-  electricConsumption: number;
+  solarGeneration: number;
+  tokensMinted: number;
   timestamp: string;
   status: "confirmed" | "pending";
 }
@@ -20,6 +20,6 @@ export interface MonthlyBlock {
   ratio: number;
 }
 
-export type BlockchainSortBy = "week" | "water" | "electric";
-export type BlockchainFilterType = "all" | "water" | "electric" | "mixed";
-export type UtilityType = "water" | "electric";
+export type BlockchainSortBy = "week" | "generation" | "tokens";
+export type BlockchainFilterType = "all" | "solar" | "tokens" | "mixed";
+export type UtilityType = "solar" | "tokens";

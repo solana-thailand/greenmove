@@ -1,22 +1,22 @@
 export const mockDashboardData = {
   totalSupply: 1000000000,
-  totalWaterConsumption: 1250.5,
-  totalElectricConsumption: 850.3,
-  waterTrend: "up" as const,
-  electricTrend: "down" as const,
-  waterChange: 5.2,
-  electricChange: -3.1,
+  totalSolarGeneration: 1250.5,
+  totalTokensMinted: 1875,
+  solarTrend: "up" as const,
+  tokensTrend: "up" as const,
+  solarChange: 5.2,
+  tokensChange: 7.8,
   activeUsers: 1250,
   totalTransactions: 8532,
   recentActivity: [
     {
-      type: "water",
-      message: "Water reading submitted",
+      type: "solar",
+      message: "Solar generation recorded",
       time: "2 hours ago",
     },
     {
-      type: "electric",
-      message: "Electric reading submitted",
+      type: "tokens",
+      message: "Tokens minted from solar",
       time: "4 hours ago",
     },
     {

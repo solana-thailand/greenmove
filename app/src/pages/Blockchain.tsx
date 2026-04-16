@@ -6,15 +6,14 @@ import {
 } from "../components/ui/Card";
 
 import Select from "../components/ui/Select";
-import { Calendar, Zap, Droplets, ArrowLeft, ArrowRight } from "lucide-react";
+import { Calendar, Sun, Coins, ArrowLeft, ArrowRight } from "lucide-react";
 import { useBlockchainData } from "../hooks/useBlockchainData";
 import ContributionGraph from "../components/features/blockchain/ContributionGraph";
 
 function Blockchain() {
   const {
     paginatedHistory,
-    monthlyWaterBlocks,
-    monthlyElectricBlocks,
+    monthlySolarBlocks,
     sortBy,
     setSortBy,
     currentPage,
@@ -31,39 +30,20 @@ function Blockchain() {
         Blockchain History
       </h2>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Droplets className="h-5 w-5 text-blue-500" />
-              Water Usage (Monthly)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ContributionGraph
-              blocks={monthlyWaterBlocks}
-              type="water"
-              title="Water Consumption"
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Zap className="h-5 w-5 text-yellow-500" />
-              Electric Usage (Monthly)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ContributionGraph
-              blocks={monthlyElectricBlocks}
-              type="electric"
-              title="Electric Consumption"
-            />
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Sun className="h-5 w-5 text-green-500" />
+            Solar Generation (Monthly)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ContributionGraph
+            blocks={monthlySolarBlocks}
+            title="Solar Generation"
+          />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -76,12 +56,12 @@ function Blockchain() {
               <Select
                 value={sortBy}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  setSortBy(e.target.value as "week" | "water" | "electric")
+                  setSortBy(e.target.value as "week" | "generation" | "tokens")
                 }
                 options={[
                   { value: "week", label: "Sort by Week" },
-                  { value: "water", label: "Sort by Water" },
-                  { value: "electric", label: "Sort by Electric" },
+                  { value: "generation", label: "Sort by Generation" },
+                  { value: "tokens", label: "Sort by Tokens" },
                 ]}
               />
             </div>
@@ -96,10 +76,10 @@ function Blockchain() {
                     Week
                   </th>
                   <th className="py-3 px-4 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Water (m³)
+                    Solar Generation (kWh)
                   </th>
                   <th className="py-3 px-4 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Electric (kWh)
+                    Tokens Minted
                   </th>
                   <th className="py-3 px-4 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
                     Status
@@ -117,17 +97,17 @@ function Blockchain() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2 text-sm">
-                        <Droplets className="h-4 w-4 text-blue-500" />
+                        <Sun className="h-4 w-4 text-green-500" />
                         <span className="text-gray-900 dark:text-white">
-                          {record.waterConsumption}
+                          {record.solarGeneration}
                         </span>
                       </div>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2 text-sm">
-                        <Zap className="h-4 w-4 text-yellow-500" />
+                        <Coins className="h-4 w-4 text-yellow-500" />
                         <span className="text-gray-900 dark:text-white">
-                          {record.electricConsumption}
+                          {record.tokensMinted}
                         </span>
                       </div>
                     </td>
@@ -160,7 +140,7 @@ function Blockchain() {
                     onClick={() => goToPage(page)}
                     className={`h-8 w-8 rounded-lg text-sm font-medium transition-colors ${
                       currentPage === page
-                        ? "bg-blue-500 text-white"
+                        ? "bg-green-500 text-white"
                         : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                     }`}
                   >
