@@ -1,9 +1,10 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Wifi, Server } from "lucide-react";
+import { Wifi, Server, Computer } from "lucide-react";
 import { useNetworkStore } from "../../stores/networkStore";
 import {
   NETWORK_MOCK,
+  NETWORK_LOCALNET,
   NETWORK_TESTNET,
   NETWORK_LABELS,
   NETWORK_COLORS,
@@ -12,10 +13,15 @@ import {
 
 const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
-const NETWORK_OPTIONS: NetworkType[] = [NETWORK_MOCK, NETWORK_TESTNET];
+const NETWORK_OPTIONS: NetworkType[] = [
+  NETWORK_MOCK,
+  NETWORK_LOCALNET,
+  NETWORK_TESTNET,
+];
 
 const NETWORK_ICONS: Record<NetworkType, typeof Wifi> = {
   [NETWORK_MOCK]: Server,
+  [NETWORK_LOCALNET]: Computer,
   [NETWORK_TESTNET]: Wifi,
 };
 

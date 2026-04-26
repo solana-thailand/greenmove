@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useConnection } from "@solana/wallet-adapter-react";
 import type { BlockchainBlock, HistoryRecord, MonthlyBlock } from "../types";
 import {
   mockBlockchainBlocks,
@@ -6,6 +7,29 @@ import {
   mockMonthlySolarBlocks,
 } from "../mock/blockchain";
 import { useNetworkStore } from "../stores/networkStore";
+import { PROGRAM_ID, ENERGY_RECORD_ACCOUNT_SIZE } from "../lib/program";
+import type { OnchainEnergyRecord } from "../lib/program";
+import { parseEnergyRecord } from "../lib/accountParser";
+import { getISOWeek, getMonth } from "date-fns";
+
+const MONTH_NAMES = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+const ITEMS_PER_PAGE = 10;
+const MAX_SOLAR_GENERATION = 1000;
+const TOKENS_MULTIPLIER = 1.5;
 
 interface UseBlockchainDataReturn {
   blocks: BlockchainBlock[];
@@ -24,88 +48,156 @@ interface UseBlockchainDataReturn {
   error: string | null;
 }
 
+function recordToHistory(record: OnchainEnergyRecord): HistoryRecord {
+  const date = new Date(record.timestamp * 1000);
+  return {
+    id: record.pubkey,
+    week: getISOWeek(date),
+    solarGeneration: record.energyWh,
+    tokensMinted: Math.round(record.energyWh * TOKENS_MULTIPLIER),
+    timestamp: date.toISOString(),
+    status: "confirmed" as const,
+  };
+}
+
+function aggregateWeekly(records: OnchainEnergyRecord[]): BlockchainBlock[] {
+  const weekMap = new Map<number, { solar: number; tokens: number }>();
+
+  for (const rec of records) {
+    const week = getISOWeek(new Date(rec.timestamp * 1000));
+    const entry = weekMap.get(week) ?? { solar: 0, tokens: 0 };
+    entry.solar += rec.energyWh;
+    entry.tokens += Math.round(rec.energyWh * TOKENS_MULTIPLIER);
+    weekMap.set(week, entry);
+  }
+
+  return Array.from(weekMap.entries())
+    .map(([week, data]) => ({
+      week,
+      solarGeneration: data.solar,
+      tokensMinted: data.tokens,
+    }))
+    .sort((a, b) => a.week - b.week);
+}
+
+function aggregateMonthly(records: OnchainEnergyRecord[]): MonthlyBlock[] {
+  const monthMap = new Map<number, number>();
+
+  for (const rec of records) {
+    const month = getMonth(new Date(rec.timestamp * 1000));
+    monthMap.set(month, (monthMap.get(month) ?? 0) + rec.energyWh);
+  }
+
+  return Array.from(monthMap.entries())
+    .map(([month, usage]) => ({
+      month,
+      monthName: MONTH_NAMES[month],
+      usage: parseFloat(usage.toFixed(1)),
+      ratio: parseFloat(Math.min(usage / MAX_SOLAR_GENERATION, 1).toFixed(2)),
+    }))
+    .sort((a, b) => a.month - b.month);
+}
+
+function sortHistory(
+  records: HistoryRecord[],
+  sortBy: "week" | "generation" | "tokens"
+): HistoryRecord[] {
+  return [...records].sort((a, b) => {
+    if (sortBy === "week") return b.week - a.week;
+    if (sortBy === "generation") return b.solarGeneration - a.solarGeneration;
+    return b.tokensMinted - a.tokensMinted;
+  });
+}
+
 export const useBlockchainData = (): UseBlockchainDataReturn => {
-  const { isMock, rpcEndpoint } = useNetworkStore();
-  const [sortBy, setSortBy] = useState<"week" | "generation" | "tokens">(
+  const { isMock } = useNetworkStore();
+  const { connection } = useConnection();
+  const [sortBy, setSortByState] = useState<"week" | "generation" | "tokens">(
     "week"
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [testnetBlocks, setTestnetBlocks] = useState<BlockchainBlock[]>([]);
-  const [testnetMonthlyBlocks, setTestnetMonthlyBlocks] = useState<
-    MonthlyBlock[]
-  >([]);
-  const itemsPerPage = 10;
+  const [onchainRecords, setOnchainRecords] = useState<OnchainEnergyRecord[]>(
+    []
+  );
 
   useEffect(() => {
-    if (isMock) return;
+    if (isMock) {
+      setOnchainRecords([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
 
     let cancelled = false;
 
-    async function fetchBlockchainData() {
+    async function fetchRecords() {
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(rpcEndpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            id: 1,
-            method: "getSlot",
-          }),
+        const accounts = await connection.getProgramAccounts(PROGRAM_ID, {
+          filters: [{ dataSize: ENERGY_RECORD_ACCOUNT_SIZE }],
         });
 
-        if (!response.ok) {
-          throw new Error(`RPC request failed: ${response.status}`);
+        if (cancelled) return;
+
+        const parsed: OnchainEnergyRecord[] = [];
+        for (const { pubkey, account } of accounts) {
+          const record = parseEnergyRecord(account.data, pubkey.toBase58());
+          if (record) parsed.push(record);
         }
 
-        if (!cancelled) {
-          setTestnetBlocks([]);
-          setTestnetMonthlyBlocks([]);
-          setIsLoading(false);
-        }
+        parsed.sort((a, b) => a.recordIndex - b.recordIndex);
+        setOnchainRecords(parsed);
+        setIsLoading(false);
       } catch (err) {
-        if (!cancelled) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Failed to fetch blockchain data"
-          );
-          setIsLoading(false);
-        }
+        if (cancelled) return;
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch blockchain data"
+        );
+        setIsLoading(false);
       }
     }
 
-    fetchBlockchainData();
+    fetchRecords();
 
     return () => {
       cancelled = true;
     };
-  }, [isMock, rpcEndpoint]);
+  }, [isMock, connection]);
 
-  const mockBlocks = mockBlockchainBlocks;
-  const mockMonthly = mockMonthlySolarBlocks;
-
-  const blocks = isMock ? mockBlocks : testnetBlocks;
-  const monthlySolarBlocks = isMock ? mockMonthly : testnetMonthlyBlocks;
-
-  const history = useMemo(
-    () => generateHistoryRecords(blocks, sortBy),
-    [blocks, sortBy]
+  const onchainBlocks = useMemo(
+    () => aggregateWeekly(onchainRecords),
+    [onchainRecords]
+  );
+  const onchainMonthly = useMemo(
+    () => aggregateMonthly(onchainRecords),
+    [onchainRecords]
+  );
+  const onchainHistoryRaw = useMemo(
+    () => onchainRecords.map(recordToHistory),
+    [onchainRecords]
   );
 
-  const totalPages = useMemo(() => {
-    return Math.ceil(history.length / itemsPerPage);
-  }, [history.length]);
+  const blocks = isMock ? mockBlockchainBlocks : onchainBlocks;
+  const monthlySolarBlocks = isMock ? mockMonthlySolarBlocks : onchainMonthly;
+
+  const history = useMemo(() => {
+    if (isMock) return generateHistoryRecords(blocks, sortBy);
+    return sortHistory(onchainHistoryRaw, sortBy);
+  }, [isMock, blocks, sortBy, onchainHistoryRaw]);
+
+  const totalPages = useMemo(
+    () => Math.ceil(history.length / ITEMS_PER_PAGE),
+    [history.length]
+  );
 
   const paginatedHistory = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return history.slice(startIndex, endIndex);
-  }, [currentPage, itemsPerPage, history]);
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return history.slice(start, start + ITEMS_PER_PAGE);
+  }, [currentPage, history]);
 
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -126,7 +218,7 @@ export const useBlockchainData = (): UseBlockchainDataReturn => {
   };
 
   const handleSortByChange = (newSortBy: "week" | "generation" | "tokens") => {
-    setSortBy(newSortBy);
+    setSortByState(newSortBy);
     setCurrentPage(1);
   };
 
@@ -137,7 +229,7 @@ export const useBlockchainData = (): UseBlockchainDataReturn => {
     sortBy,
     setSortBy: handleSortByChange,
     currentPage,
-    itemsPerPage,
+    itemsPerPage: ITEMS_PER_PAGE,
     totalPages,
     paginatedHistory,
     goToPage,

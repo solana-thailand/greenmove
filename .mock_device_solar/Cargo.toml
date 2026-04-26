@@ -3,5 +3,15 @@ name = "solarcell"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "solarcell-cli"
+path = "src/main.rs"
+
 [dependencies]
 async-trait = "0.1.89"
+solana-sdk = "2.2"
+solana-client = "2.2"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
+clap = { version = "4", features = ["derive"] }
+bs58 = "0.5"
+borsh = "1"
