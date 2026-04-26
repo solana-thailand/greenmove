@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { SwapTransaction } from "../types";
 import { mockSwapTransactions } from "../mock/swap";
+import { useNetworkStore } from "../stores/networkStore";
 
 interface TokenBalance {
   [key: string]: number;
@@ -25,6 +26,8 @@ interface UseSwapDataReturn {
   setFromToken: (token: string) => void;
   setToToken: (token: string) => void;
   handleSwap: () => void;
+  isLoading: boolean;
+  error: string | null;
 }
 
 const MOCK_TOKEN_BALANCES: TokenBalance = {
@@ -44,17 +47,72 @@ const MOCK_EXCHANGE_RATES: ExchangeRates = {
 };
 
 export const useSwapData = (): UseSwapDataReturn => {
+  const { isMock, rpcEndpoint } = useNetworkStore();
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
   const [fromToken, setFromToken] = useState("GREENMOVE");
   const [toToken, setToToken] = useState("SOL");
   const [isSwapping, setIsSwapping] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [testnetBalances, setTestnetBalances] = useState<TokenBalance>({});
+  const [testnetRates, setTestnetRates] = useState<ExchangeRates>({});
+  const [testnetHistory, setTestnetHistory] = useState<SwapTransaction[]>([]);
 
-  const swapHistory = mockSwapTransactions;
+  useEffect(() => {
+    if (isMock) return;
+
+    let cancelled = false;
+
+    async function fetchSwapData() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(rpcEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "getHealth",
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`RPC request failed: ${response.status}`);
+        }
+
+        if (!cancelled) {
+          setTestnetBalances({});
+          setTestnetRates({});
+          setTestnetHistory([]);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Failed to fetch swap data"
+          );
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchSwapData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isMock, rpcEndpoint]);
+
+  const tokenBalances = isMock ? MOCK_TOKEN_BALANCES : testnetBalances;
+  const exchangeRates = isMock ? MOCK_EXCHANGE_RATES : testnetRates;
+  const swapHistory = isMock ? mockSwapTransactions : testnetHistory;
 
   const getExchangeRate = (): number => {
-    const key = `${fromToken}-${toToken}` as keyof typeof MOCK_EXCHANGE_RATES;
-    return MOCK_EXCHANGE_RATES[key] || 0;
+    const key = `${fromToken}-${toToken}` as keyof typeof exchangeRates;
+    return exchangeRates[key] || 0;
   };
 
   const exchangeRate = getExchangeRate();
@@ -95,8 +153,8 @@ export const useSwapData = (): UseSwapDataReturn => {
     fromToken,
     toToken,
     isSwapping,
-    tokenBalances: MOCK_TOKEN_BALANCES,
-    exchangeRates: MOCK_EXCHANGE_RATES,
+    tokenBalances,
+    exchangeRates,
     swapHistory,
     exchangeRate,
     setFromAmount: handleFromAmountChange,
@@ -104,5 +162,7 @@ export const useSwapData = (): UseSwapDataReturn => {
     setFromToken: handleFromTokenChange,
     setToToken: handleToTokenChange,
     handleSwap,
+    isLoading: isMock ? false : isLoading,
+    error: isMock ? null : error,
   };
 };

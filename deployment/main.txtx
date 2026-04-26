@@ -1,0 +1,22 @@
+signer "authority" "svm::secret_key" {
+    keypair_json = "~/.config/solana/id.json"
+}
+
+action "setup" "svm::setup_surfnet" {
+    set_account {
+        public_key = signer.authority.public_key
+        lamports = 999999999999
+    }
+}
+
+action "deploy_greenmove" "svm::deploy_program" {
+    description = "Deploy the greenmove solar energy program"
+    program = svm::get_program_from_anchor_project("greenmove")
+    authority = signer.authority
+    payer = signer.authority
+}
+
+output "program_id" {
+    description = "Deployed greenmove program ID"
+    value = action.deploy_greenmove.program_id
+}

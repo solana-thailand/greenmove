@@ -6,12 +6,14 @@ import "./index.css";
 import { ErrorFallback } from "./components/ErrorFallback";
 import { NotFound } from "./components/NotFound";
 import { MainLayout } from "./components/layout";
+import SolanaContext from "./lib/SolanaContext";
 
 import Dashboard from "./pages/Dashboard";
 import Consumption from "./pages/Consumption";
 import Blockchain from "./pages/Blockchain";
 import KYC from "./pages/KYC";
 import Swap from "./pages/Swap";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -34,6 +36,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <SolanaContext>
+      <RouterProvider router={router} />
+    </SolanaContext>
   </StrictMode>
 );

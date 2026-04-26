@@ -1,0 +1,16 @@
+---
+name: greenmove-deployment
+runbooks:
+  - name: Deploy Greenmove
+    description: Deploy the greenmove solar energy program
+    location: ./deployment
+environments:
+  development:
+    network_id: localnet
+    rpc_api_url: http://localhost:8899
+  devnet:
+    network_id: devnet
+    rpc_api_url: https://api.devnet.solana.com
+  mainnet:
+    network_id: mainnet
+    rpc_api_url: https://api.mainnet-beta.solana.com

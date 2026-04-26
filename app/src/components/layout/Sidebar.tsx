@@ -11,6 +11,7 @@ import {
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import Button from "../ui/Button";
+import NetworkSwitcher from "../ui/NetworkSwitcher";
 
 const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
@@ -115,6 +116,9 @@ const Sidebar = forwardRef<HTMLElement, SidebarProps>(
         </NavLink>
       </nav>
       <div className="border-t border-gray-200 p-4 dark:border-gray-800">
+        <div className="mb-3 flex justify-center">
+          <NetworkSwitcher />
+        </div>
         <Button
           variant="outline"
           className="w-full justify-start"

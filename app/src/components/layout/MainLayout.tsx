@@ -8,23 +8,10 @@ const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
 interface MainLayoutProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
-  onWalletClick?: () => void;
-  isWalletConnected?: boolean;
-  walletAddress?: string;
 }
 
 const MainLayout = forwardRef<HTMLDivElement, MainLayoutProps>(
-  (
-    {
-      className,
-      children,
-      onWalletClick,
-      isWalletConnected = false,
-      walletAddress,
-      ...props
-    },
-    ref
-  ) => (
+  ({ className, children, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
@@ -34,11 +21,7 @@ const MainLayout = forwardRef<HTMLDivElement, MainLayoutProps>(
       {...props}
     >
       <div className="flex flex-1">
-        <Sidebar
-          onWalletClick={onWalletClick}
-          isWalletConnected={isWalletConnected}
-          walletAddress={walletAddress}
-        />
+        <Sidebar />
         <main className="flex-1 overflow-auto max-h-screen">
           <div className="container mx-auto max-w-7xl px-4 py-6 sm:px-6">
             {children}
