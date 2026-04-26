@@ -20,7 +20,8 @@ Solar energy tracking on Solana. Register solar devices, record energy generatio
             ▼
 ┌─────────────────────────┐
 │   React Frontend         │
-│   Dashboard / Blockchain │
+│   Dashboard / Devices    │
+│   Consumption / History  │
 │   Network Switcher       │
 └─────────────────────────┘
 ```
@@ -108,24 +109,39 @@ Switch to **Local** network in the UI to see on-chain data.
 ## Mock Device CLI
 
 ```sh
-cd .mock_device_solar
-
 # Register a device
-cargo run -- register --unique-id "MY-PANEL" --name "My Solar Panel"
+cargo run --manifest-path .mock_device_solar/Cargo.toml -- register \
+  --unique-id "MY-PANEL" --name "My Solar Panel"
 
 # Record energy
-cargo run -- record --unique-id "MY-PANEL" --wattage 3500 --energy 25
+cargo run --manifest-path .mock_device_solar/Cargo.toml -- record \
+  --unique-id "MY-PANEL" --wattage 3500 --energy 25
 
 # Continuous recording (every 5s)
-cargo run -- run --unique-id "MY-PANEL" --interval 5
+cargo run --manifest-path .mock_device_solar/Cargo.toml -- run \
+  --unique-id "MY-PANEL" --interval 5
 
 # View device info
-cargo run -- info --unique-id "MY-PANEL"
+cargo run --manifest-path .mock_device_solar/Cargo.toml -- info \
+  --unique-id "MY-PANEL"
 ```
 
 Options:
 - `--rpc <URL>` — RPC endpoint (default: `http://127.0.0.1:8899`)
 - `--keypair <PATH>` — Signer keypair (default: `~/.config/solana/id.json`)
+
+## Frontend Pages
+
+| Page | Path | Description |
+|---|---|---|
+| Dashboard | `/` | Overview with total supply, solar generation, tokens minted |
+| Consumption | `/consumption` | Solar generation tracking with monthly comparison heatmap |
+| Devices | `/devices` | Registered on-chain devices with details and status |
+| Blockchain | `/blockchain` | Transaction history with contribution graph |
+| KYC | `/kyc` | Identity verification |
+| Swap | `/swap` | Token swap interface |
+
+Each page supports **mock mode** (local data) and **on-chain mode** (real Solana data) via the network switcher.
 
 ## Frontend Networks
 
@@ -159,11 +175,18 @@ greenmove/
 │   ├── hooks/
 │   │   ├── useOnchainDevices.ts  # Fetch SolarDevice accounts
 │   │   ├── useOnchainRecords.ts  # Fetch EnergyRecord accounts
+│   │   ├── useConsumptionData.ts # Consumption data (mock/on-chain)
 │   │   ├── useDashboardData.ts   # Dashboard data (mock/on-chain)
 │   │   └── useBlockchainData.ts  # Blockchain history (mock/on-chain)
-│   ├── pages/                    # Dashboard, Consumption, Blockchain, etc.
+│   ├── components/features/
+│   │   ├── consumption/          # SolarGenerationCard, TokensMintedCard,
+│   │   │                         # MonthlyComparisonTable, LocalConsumption
+│   │   ├── devices/              # DeviceCard, DeviceList
+│   │   └── blockchain/           # ContributionGraph
+│   ├── pages/                    # Dashboard, Consumption, Devices, Blockchain, etc.
 │   └── stores/                   # Zustand state (network, wallet)
-├── surfpool-dev.sh               # Surfpool lifecycle (start/stop/deploy/test)
+├── surfpool-dev.sh               # Surfpool lifecycle (start/stop/deploy/test/reset)
+├── surfpool-stop.sh              # Stop surfpool standalone
 ├── seed-localnet.sh              # Seed mock device data
 └── Anchor.toml                   # Anchor config
 ```
@@ -189,6 +212,12 @@ bash surfpool-dev.sh test
 bash surfpool-dev.sh reset
 ```
 
+### Stop Surfpool
+
+```sh
+./surfpool-stop.sh
+```
+
 ### Frontend Build
 
 ```sh
@@ -205,6 +234,7 @@ Development progress tracked in `.plans/`:
 | 02 | Network switcher + Surfpool integration | Done |
 | 03 | Solana wallet integration | Done |
 | 04 | Mock device → blockchain → frontend | Done |
+| 05 | Consumption local UI components | Done |
 
 ## License
 
