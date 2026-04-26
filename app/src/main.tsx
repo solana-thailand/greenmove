@@ -13,6 +13,7 @@ import Consumption from "./pages/Consumption";
 import Blockchain from "./pages/Blockchain";
 import KYC from "./pages/KYC";
 import Swap from "./pages/Swap";
+import Devices from "./pages/Devices";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
       { index: true, element: <Dashboard /> },
       { path: "consumption", element: <Consumption /> },
       { path: "blockchain", element: <Blockchain /> },
+      { path: "devices", element: <Devices /> },
       { path: "kyc", element: <KYC /> },
       { path: "swap", element: <Swap /> },
       { path: "*", element: <NotFound /> },

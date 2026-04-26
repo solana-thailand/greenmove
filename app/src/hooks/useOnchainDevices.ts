@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useNetworkStore } from "../stores/networkStore";
-import { PROGRAM_ID, SOLAR_DEVICE_ACCOUNT_SIZE } from "../lib/program";
+import { PROGRAM_ID } from "../lib/program";
 import type { OnchainSolarDevice } from "../lib/program";
 import { parseSolarDevice } from "../lib/accountParser";
+
+const SOLAR_DEVICE_MIN_SIZE = 8 + 32 + 4 + 4 + 8 + 8 + 8 + 1 + 8 + 8 + 1;
 
 interface UseOnchainDevicesReturn {
   devices: OnchainSolarDevice[];
@@ -41,14 +43,13 @@ export function useOnchainDevices(): UseOnchainDevicesReturn {
       setError(null);
 
       try {
-        const accounts = await connection.getProgramAccounts(PROGRAM_ID, {
-          filters: [{ dataSize: SOLAR_DEVICE_ACCOUNT_SIZE }],
-        });
+        const accounts = await connection.getProgramAccounts(PROGRAM_ID);
 
         if (cancelled) return;
 
         const parsed: OnchainSolarDevice[] = [];
         for (const { pubkey, account } of accounts) {
+          if (account.data.length < SOLAR_DEVICE_MIN_SIZE) continue;
           const device = parseSolarDevice(account.data, pubkey.toBase58());
           if (device) {
             parsed.push(device);

@@ -5,7 +5,7 @@ import {
   CardTitle,
 } from "../components/ui/Card";
 import { Link } from "react-router-dom";
-import { Sun, Coins, ArrowRight } from "lucide-react";
+import { Sun, Coins, ArrowRight, Smartphone } from "lucide-react";
 
 function Dashboard() {
   const totalSupply = 1000000000;
@@ -103,6 +103,16 @@ function Dashboard() {
               <div className="flex items-center gap-2">
                 <Coins className="h-4 w-4" />
                 Swap Tokens
+              </div>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/devices"
+              className="flex items-center justify-between gap-3 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              <div className="flex items-center gap-2">
+                <Smartphone className="h-4 w-4" />
+                Registered Devices
               </div>
               <ArrowRight className="h-4 w-4" />
             </Link>

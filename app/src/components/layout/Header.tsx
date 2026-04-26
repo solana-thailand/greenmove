@@ -45,6 +45,12 @@ const Header = forwardRef<HTMLElement, HTMLAttributes<HTMLElement>>(
                 Blockchain
               </a>
               <a
+                href="/devices"
+                className="text-sm font-medium text-gray-700 transition-colors hover:text-primary dark:text-gray-300 dark:hover:text-primary"
+              >
+                Devices
+              </a>
+              <a
                 href="/kyc"
                 className="text-sm font-medium text-gray-700 transition-colors hover:text-primary dark:text-gray-300 dark:hover:text-primary"
               >

@@ -7,7 +7,11 @@ import {
   mockMonthlySolarBlocks,
 } from "../mock/blockchain";
 import { useNetworkStore } from "../stores/networkStore";
-import { PROGRAM_ID, ENERGY_RECORD_ACCOUNT_SIZE } from "../lib/program";
+import {
+  PROGRAM_ID,
+  ANCHOR_DISCRIMINATOR_SIZE,
+  PUBKEY_SIZE,
+} from "../lib/program";
 import type { OnchainEnergyRecord } from "../lib/program";
 import { parseEnergyRecord } from "../lib/accountParser";
 import { getISOWeek, getMonth } from "date-fns";
@@ -28,8 +32,14 @@ const MONTH_NAMES = [
 ];
 
 const ITEMS_PER_PAGE = 10;
+const ENERGY_RECORD_MIN_SIZE =
+  ANCHOR_DISCRIMINATOR_SIZE + PUBKEY_SIZE + PUBKEY_SIZE + 8 + 8 + 8 + 8 + 8 + 1;
 const MAX_SOLAR_GENERATION = 1000;
 const TOKENS_MULTIPLIER = 1.5;
+
+function isValidDate(d: Date): boolean {
+  return !isNaN(d.getTime());
+}
 
 interface UseBlockchainDataReturn {
   blocks: BlockchainBlock[];
@@ -48,8 +58,9 @@ interface UseBlockchainDataReturn {
   error: string | null;
 }
 
-function recordToHistory(record: OnchainEnergyRecord): HistoryRecord {
+function recordToHistory(record: OnchainEnergyRecord): HistoryRecord | null {
   const date = new Date(record.timestamp * 1000);
+  if (!isValidDate(date)) return null;
   return {
     id: record.pubkey,
     week: getISOWeek(date),
@@ -64,7 +75,9 @@ function aggregateWeekly(records: OnchainEnergyRecord[]): BlockchainBlock[] {
   const weekMap = new Map<number, { solar: number; tokens: number }>();
 
   for (const rec of records) {
-    const week = getISOWeek(new Date(rec.timestamp * 1000));
+    const date = new Date(rec.timestamp * 1000);
+    if (!isValidDate(date)) continue;
+    const week = getISOWeek(date);
     const entry = weekMap.get(week) ?? { solar: 0, tokens: 0 };
     entry.solar += rec.energyWh;
     entry.tokens += Math.round(rec.energyWh * TOKENS_MULTIPLIER);
@@ -84,7 +97,9 @@ function aggregateMonthly(records: OnchainEnergyRecord[]): MonthlyBlock[] {
   const monthMap = new Map<number, number>();
 
   for (const rec of records) {
-    const month = getMonth(new Date(rec.timestamp * 1000));
+    const date = new Date(rec.timestamp * 1000);
+    if (!isValidDate(date)) continue;
+    const month = getMonth(date);
     monthMap.set(month, (monthMap.get(month) ?? 0) + rec.energyWh);
   }
 
@@ -124,10 +139,12 @@ export const useBlockchainData = (): UseBlockchainDataReturn => {
 
   useEffect(() => {
     if (isMock) {
-      setOnchainRecords([]);
-      setIsLoading(false);
-      setError(null);
-      return;
+      const id = requestAnimationFrame(() => {
+        setOnchainRecords([]);
+        setIsLoading(false);
+        setError(null);
+      });
+      return () => cancelAnimationFrame(id);
     }
 
     let cancelled = false;
@@ -137,14 +154,13 @@ export const useBlockchainData = (): UseBlockchainDataReturn => {
       setError(null);
 
       try {
-        const accounts = await connection.getProgramAccounts(PROGRAM_ID, {
-          filters: [{ dataSize: ENERGY_RECORD_ACCOUNT_SIZE }],
-        });
+        const accounts = await connection.getProgramAccounts(PROGRAM_ID);
 
         if (cancelled) return;
 
         const parsed: OnchainEnergyRecord[] = [];
         for (const { pubkey, account } of accounts) {
+          if (account.data.length < ENERGY_RECORD_MIN_SIZE) continue;
           const record = parseEnergyRecord(account.data, pubkey.toBase58());
           if (record) parsed.push(record);
         }
@@ -177,7 +193,10 @@ export const useBlockchainData = (): UseBlockchainDataReturn => {
     [onchainRecords]
   );
   const onchainHistoryRaw = useMemo(
-    () => onchainRecords.map(recordToHistory),
+    () =>
+      onchainRecords
+        .map(recordToHistory)
+        .filter((r): r is HistoryRecord => r !== null),
     [onchainRecords]
   );
 

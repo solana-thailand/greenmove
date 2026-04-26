@@ -1,6 +1,9 @@
 import { PublicKey } from "@solana/web3.js";
 import type { OnchainSolarDevice, OnchainEnergyRecord } from "./program";
 
+const TIMESTAMP_MIN = 1_577_836_800;
+const TIMESTAMP_MAX = 4_102_444_800;
+
 function readBorshString(data: Uint8Array, offset: number): [string, number] {
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const len = view.getUint32(offset, true);
@@ -54,6 +57,9 @@ export function parseSolarDevice(
 
     const bump = data[offset];
 
+    if (registeredAt < TIMESTAMP_MIN || registeredAt > TIMESTAMP_MAX)
+      return null;
+
     return {
       owner,
       uniqueId,
@@ -101,6 +107,8 @@ export function parseEnergyRecord(
     offset += 8;
 
     const bump = data[offset];
+
+    if (timestamp < TIMESTAMP_MIN || timestamp > TIMESTAMP_MAX) return null;
 
     return {
       device,

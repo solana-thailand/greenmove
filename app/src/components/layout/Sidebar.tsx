@@ -6,6 +6,7 @@ import {
   Blocks,
   UserCheck,
   ArrowLeftRight,
+  Smartphone,
   Wallet,
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
@@ -74,6 +75,20 @@ const Sidebar = forwardRef<HTMLElement, HTMLAttributes<HTMLElement>>(
           >
             <Blocks className="h-4 w-4" />
             Blockchain
+          </NavLink>
+          <NavLink
+            to="/devices"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-primary text-white"
+                  : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              )
+            }
+          >
+            <Smartphone className="h-4 w-4" />
+            Devices
           </NavLink>
           <NavLink
             to="/kyc"

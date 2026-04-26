@@ -3,11 +3,15 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { useNetworkStore } from "../stores/networkStore";
 import {
   PROGRAM_ID,
-  ENERGY_RECORD_ACCOUNT_SIZE,
-  ENERGY_RECORD_DEVICE_OFFSET,
+  ANCHOR_DISCRIMINATOR_SIZE,
+  PUBKEY_SIZE,
 } from "../lib/program";
 import type { OnchainEnergyRecord } from "../lib/program";
 import { parseEnergyRecord } from "../lib/accountParser";
+
+const ENERGY_RECORD_MIN_SIZE =
+  ANCHOR_DISCRIMINATOR_SIZE + PUBKEY_SIZE + PUBKEY_SIZE + 8 + 8 + 8 + 8 + 8 + 1;
+const DEVICE_PUBKEY_OFFSET = ANCHOR_DISCRIMINATOR_SIZE;
 
 interface UseOnchainRecordsReturn {
   records: OnchainEnergyRecord[];
@@ -31,7 +35,7 @@ export function useOnchainRecords(
   }, []);
 
   useEffect(() => {
-    if (isMock || !devicePubkey) {
+    if (isMock) {
       const id = requestAnimationFrame(() => {
         setRecords([]);
         setIsLoading(false);
@@ -47,30 +51,32 @@ export function useOnchainRecords(
       setError(null);
 
       try {
-        const accounts = await connection.getProgramAccounts(PROGRAM_ID, {
-          filters: [
-            { dataSize: ENERGY_RECORD_ACCOUNT_SIZE },
-            {
-              memcmp: {
-                offset: ENERGY_RECORD_DEVICE_OFFSET,
-                bytes: devicePubkey,
-              },
-            },
-          ],
-        });
+        const accounts = devicePubkey
+          ? await connection.getProgramAccounts(PROGRAM_ID, {
+              filters: [
+                {
+                  memcmp: {
+                    offset: DEVICE_PUBKEY_OFFSET,
+                    bytes: devicePubkey,
+                  },
+                },
+              ],
+            })
+          : await connection.getProgramAccounts(PROGRAM_ID);
 
         if (cancelled) return;
 
         const parsed: OnchainEnergyRecord[] = [];
         for (const { pubkey, account } of accounts) {
+          if (account.data.length < ENERGY_RECORD_MIN_SIZE) continue;
           const record = parseEnergyRecord(account.data, pubkey.toBase58());
           if (record) {
+            if (devicePubkey && record.device !== devicePubkey) continue;
             parsed.push(record);
           }
         }
 
         parsed.sort((a, b) => a.recordIndex - b.recordIndex);
-
         setRecords(parsed);
         setIsLoading(false);
       } catch (err) {
