@@ -1,5 +1,8 @@
-greenmove/app/src/lib/program.ts
-export const PROGRAM_ID = "36D7U8McCLZF9ahuGmoiXehXzFLFm6v8N1gQVAfricSY";
+import { PublicKey } from "@solana/web3.js";
+
+export const PROGRAM_ID = new PublicKey(
+  "36D7U8McCLZF9ahuGmoiXehXzFLFm6v8N1gQVAfricSY"
+);
 
 export const SOLAR_DEVICE_SEED = "solar_device";
 export const ENERGY_RECORD_SEED = "energy_record";

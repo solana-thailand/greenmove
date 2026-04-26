@@ -16,7 +16,9 @@ interface UseOnchainRecordsReturn {
   refetch: () => void;
 }
 
-export function useOnchainRecords(devicePubkey: string | null): UseOnchainRecordsReturn {
+export function useOnchainRecords(
+  devicePubkey: string | null
+): UseOnchainRecordsReturn {
   const { connection } = useConnection();
   const { isMock } = useNetworkStore();
   const [records, setRecords] = useState<OnchainEnergyRecord[]>([]);
@@ -30,10 +32,12 @@ export function useOnchainRecords(devicePubkey: string | null): UseOnchainRecord
 
   useEffect(() => {
     if (isMock || !devicePubkey) {
-      setRecords([]);
-      setIsLoading(false);
-      setError(null);
-      return;
+      const id = requestAnimationFrame(() => {
+        setRecords([]);
+        setIsLoading(false);
+        setError(null);
+      });
+      return () => cancelAnimationFrame(id);
     }
 
     let cancelled = false;
@@ -72,7 +76,7 @@ export function useOnchainRecords(devicePubkey: string | null): UseOnchainRecord
       } catch (err) {
         if (cancelled) return;
         setError(
-          err instanceof Error ? err.message : "Failed to fetch energy records",
+          err instanceof Error ? err.message : "Failed to fetch energy records"
         );
         setIsLoading(false);
       }

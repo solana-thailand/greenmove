@@ -1,11 +1,7 @@
-greenmove/app/src/hooks/useOnchainDevices.ts
 import { useState, useEffect, useCallback } from "react";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useNetworkStore } from "../stores/networkStore";
-import {
-  PROGRAM_ID,
-  SOLAR_DEVICE_ACCOUNT_SIZE,
-} from "../lib/program";
+import { PROGRAM_ID, SOLAR_DEVICE_ACCOUNT_SIZE } from "../lib/program";
 import type { OnchainSolarDevice } from "../lib/program";
 import { parseSolarDevice } from "../lib/accountParser";
 
@@ -30,10 +26,12 @@ export function useOnchainDevices(): UseOnchainDevicesReturn {
 
   useEffect(() => {
     if (isMock) {
-      setDevices([]);
-      setIsLoading(false);
-      setError(null);
-      return;
+      const id = requestAnimationFrame(() => {
+        setDevices([]);
+        setIsLoading(false);
+        setError(null);
+      });
+      return () => cancelAnimationFrame(id);
     }
 
     let cancelled = false;
@@ -62,7 +60,7 @@ export function useOnchainDevices(): UseOnchainDevicesReturn {
       } catch (err) {
         if (cancelled) return;
         setError(
-          err instanceof Error ? err.message : "Failed to fetch devices",
+          err instanceof Error ? err.message : "Failed to fetch devices"
         );
         setIsLoading(false);
       }
