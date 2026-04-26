@@ -1,6 +1,9 @@
 [workspace]
 members = [
-    "programs/*"
+    "programs/*",
+]
+exclude = [
+    ".mock_device_solar",
 ]
 resolver = "2"
 

@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-greenmove = "6iKNyZGH5CNddXFYmeNniZbeQM74iCsRHHDsW5DHzxaJ"
+greenmove = "36D7U8McCLZF9ahuGmoiXehXzFLFm6v8N1gQVAfricSY"
 
 [provider]
 cluster = "localnet"
