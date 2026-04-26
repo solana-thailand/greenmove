@@ -26,11 +26,7 @@ fn send_ix(svm: &mut LiteSVM, payer: &Keypair, ix: Instruction) -> bool {
     let blockhash = svm.latest_blockhash();
     let msg = Message::new_with_blockhash(&[ix], Some(&payer.pubkey()), &blockhash);
     let tx = VersionedTransaction::try_new(VersionedMessage::Legacy(msg), &[payer]).unwrap();
-    let res = svm.send_transaction(tx);
-    if let Err(ref e) = res {
-        eprintln!("send_ix error: {:?}", e);
-    }
-    res.is_ok()
+    svm.send_transaction(tx).is_ok()
 }
 
 /// Helper: derive the SolarDevice PDA.

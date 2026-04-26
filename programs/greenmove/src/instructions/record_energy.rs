@@ -25,7 +25,7 @@ pub struct RecordEnergy<'info> {
     #[account(
         init,
         payer = owner,
-        space = EnergyRecord::INIT_SPACE,
+        space = 8 + EnergyRecord::INIT_SPACE,
         seeds = [ENERGY_RECORD_SEED.as_bytes(), device.key().as_ref(), &device.record_count.to_le_bytes()],
         bump,
     )]
