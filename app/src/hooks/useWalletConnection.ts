@@ -17,16 +17,6 @@ interface WalletConnectionState {
   disconnect: () => void;
 }
 
-export function useWalletConnection(): WalletConnectionState {
-  const { isMock } = useNetworkStore();
-
-  if (isMock) {
-    return useMockWallet();
-  }
-
-  return useSolanaWallet();
-}
-
 function useMockWallet(): WalletConnectionState {
   const {
     isConnected,
@@ -74,7 +64,9 @@ function useSolanaWallet(): WalletConnectionState {
       void disconnect();
       updateBalance(0);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to disconnect wallet");
+      setError(
+        err instanceof Error ? err.message : "Failed to disconnect wallet"
+      );
     }
   };
 
@@ -89,4 +81,12 @@ function useSolanaWallet(): WalletConnectionState {
     connect: handleConnect,
     disconnect: handleDisconnect,
   };
+}
+
+export function useWalletConnection(): WalletConnectionState {
+  const { isMock } = useNetworkStore();
+  const mock = useMockWallet();
+  const solana = useSolanaWallet();
+
+  return isMock ? mock : solana;
 }
